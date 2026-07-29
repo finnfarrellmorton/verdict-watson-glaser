@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Verdict is an independent Watson-Glaser-style critical-thinking practice platform for university students.">
+  <title>Verdict — Critical Thinking Test Prep</title>
+  <link rel="stylesheet" href="styles.css?v=critical-platform-1">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#" data-view-link="dashboard" aria-label="Verdict home">
+        <span class="brand-mark">V</span>
+        <span><strong>Verdict</strong><small>Assessment prep</small></span>
+      </a>
+
+      <nav class="nav" aria-label="Primary navigation">
+        <button class="nav-item active" data-view="dashboard">Home</button>
+        <button class="nav-item" data-view="practice">Practice</button>
+        <button class="nav-item" data-view="firmData">Firm data</button>
+        <button class="nav-item" data-view="progress">Analytics</button>
+        <button class="nav-item" data-view="review">Review wrong answers</button>
+        <button class="nav-item profile-nav" data-view="account">Profile</button>
+      </nav>
+
+      <section class="sidebar-card">
+        <small>Signed in as</small>
+        <strong id="sidebarName">Guest student</strong>
+        <span id="sidebarPlan">Free preview</span>
+      </section>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow" id="eyebrow">PRIVATE PRACTICE PLATFORM</p>
+          <h1 id="viewTitle">Choose a diagnostic or a domain.</h1>
+        </div>
+        <div class="header-actions">
+          <label class="role-switcher advanced-control">Role
+            <select id="roleSelect" aria-label="Switch role">
+              <option value="student">Student</option>
+              <option value="reviewer">Content reviewer</option>
+              <option value="admin">Administrator</option>
+            </select>
+          </label>
+          <button class="primary" data-view-jump="practice">Practice</button>
+        </div>
+      </header>
+
+      <section class="view active" id="dashboardView">
+        <section class="hero">
+          <div>
+            <span class="soft-label">PRICING</span>
+            <h2>Choose the level of practice you need.</h2>
+            <p>Start with free firm research, or unlock full mock tests, domain drills, analytics and wrong-answer review.</p>
+            <div class="hero-actions">
+              <button class="primary light" data-checkout-plan="pro">Start Pro</button>
+              <button class="secondary light" data-view-jump="firmData">Use free firm data</button>
+            </div>
+          </div>
+          <div class="hero-panel">
+            <span>Most useful</span>
+            <strong>£19/mo</strong>
+            <small>Full mocks, domain drills, analytics and review.</small>
+          </div>
+        </section>
+
+        <section class="landing-section">
+          <section class="price-grid landing-pricing">
+            <article class="price-card">
+              <p class="eyebrow">FREE</p>
+              <h3>Firm research</h3>
+              <div class="price"><strong>£0</strong></div>
+              <ul>
+                <li>Firm leaderboard and search</li>
+                <li>Firm detail pages</li>
+                <li>Basic practice preview</li>
+              </ul>
+              <button class="secondary full" data-view-jump="firmData">Explore firms</button>
+            </article>
+            <article class="price-card featured">
+              <span class="popular">MOST USEFUL</span>
+              <p class="eyebrow">PRO</p>
+              <h3>Assessment prep</h3>
+              <div class="price"><strong>£19</strong><span>/ month</span></div>
+              <ul>
+                <li>Full mocks and short mocks</li>
+                <li>All five domain drills</li>
+                <li>Analytics and wrong-answer review</li>
+              </ul>
+              <button class="primary full" data-checkout-plan="pro">Start Pro</button>
+            </article>
+            <article class="price-card">
+              <p class="eyebrow">INSTITUTION</p>
+              <h3>Societies and cohorts</h3>
+              <div class="price"><strong>Custom</strong></div>
+              <ul>
+                <li>Cohort access</li>
+                <li>Aggregate analytics</li>
+                <li>Admin support</li>
+              </ul>
+              <button class="secondary full" data-checkout-plan="institution">Request access</button>
+            </article>
+          </section>
+        </section>
+
+        <section class="landing-section">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">FIRM DATA</p>
+              <h2>Search firms before you practise.</h2>
+              <p>Compare firms by trainee seats, pay, training, work quality, balance and international exposure.</p>
+            </div>
+            <button class="secondary" data-view-jump="firmData">Open firm data</button>
+          </div>
+          <section class="firm-data-layout landing-firms">
+            <article class="panel">
+              <div class="panel-head">
+                <div>
+                  <p class="eyebrow">TOP FIRMS</p>
+                  <h3>Training contract seats</h3>
+                </div>
+              </div>
+              <div class="firm-ranking-list compact-list" id="landingFirmPreview"></div>
+            </article>
+            <aside class="panel landing-firm-copy">
+              <p class="eyebrow">WHY IT MATTERS</p>
+              <h3>Firm research should sit beside test prep.</h3>
+              <p>Students need to know where they are applying, what the firm is known for, and how their reasoning practice connects to real graduate recruitment.</p>
+            </aside>
+          </section>
+        </section>
+
+        <section class="diagnostic-grid landing-hidden">
+          <article class="diagnostic-card" data-start-mock="full">
+            <span>Mock test</span>
+            <strong>Full Watson Glaser mock</strong>
+            <small>40 mixed questions</small>
+          </article>
+          <article class="diagnostic-card" data-start-mock="mini">
+            <span>Short mock</span>
+            <strong>Quick mixed practice</strong>
+            <small>12 mixed questions</small>
+          </article>
+        </section>
+
+        <section class="status-grid slim landing-hidden">
+          <article><small>Questions completed</small><strong id="statCompleted">0</strong><span>Across all attempts</span></article>
+          <article><small>Average accuracy</small><strong id="statAccuracy">0%</strong><span>Based on submitted answers</span></article>
+          <article><small>Due for review</small><strong id="statDue">0</strong><span>Mistakes and flagged questions</span></article>
+          <article><small>Current streak</small><strong id="statStreak">0 days</strong><span id="targetCopy">Set a daily target in profile</span></article>
+        </section>
+
+        <section class="section-heading landing-hidden">
+          <div>
+            <p class="eyebrow">DOMAINS</p>
+            <h2 id="nextActionTitle">Practise one skill.</h2>
+            <p id="nextActionCopy">Tap a domain to start a short drill.</p>
+          </div>
+          <button class="primary" id="nextActionButton">Start now</button>
+        </section>
+
+        <section class="domain-grid landing-hidden" id="dashboardDomains"></section>
+
+        <section class="activity-layout dashboard-extra">
+          <article class="panel">
+            <p class="eyebrow">RECENT ACTIVITY</p>
+            <div class="history-list" id="recentActivity"></div>
+          </article>
+          <article class="panel">
+            <p class="eyebrow">MISTAKE THEMES</p>
+            <div class="theme-list" id="mistakeThemes"></div>
+          </article>
+        </section>
+      </section>
+
+      <section class="view" id="learnView">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">LEARN MODE</p>
+            <h2>Understand the five critical-reasoning domains before you drill them.</h2>
+            <p>Short lessons focus on rules, traps and worked examples without revealing practice answers prematurely.</p>
+          </div>
+        </div>
+        <section class="lesson-grid" id="lessonGrid"></section>
+        <article class="panel lesson-detail" id="lessonDetail"></article>
+      </section>
+
+      <section class="view" id="practiceView">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">PRACTICE</p>
+            <h2>Choose a mock or a question type.</h2>
+          </div>
+        </div>
+        <section class="diagnostic-grid">
+          <article class="diagnostic-card" data-start-mock="full">
+            <span>Mock test</span>
+            <strong>Full Watson Glaser mock</strong>
+            <small>40 mixed questions</small>
+          </article>
+          <article class="diagnostic-card" data-start-mock="mini">
+            <span>Short mock</span>
+            <strong>Quick mixed practice</strong>
+            <small>12 mixed questions</small>
+          </article>
+        </section>
+        <section class="section-heading compact-heading">
+          <div>
+            <p class="eyebrow">QUESTION TYPES</p>
+            <h2>Domain practice</h2>
+          </div>
+        </section>
+        <section class="domain-grid" id="practiceDomains"></section>
+        <section class="setup-panel advanced-practice">
+          <label>Mode
+            <select id="practiceMode">
+              <option value="adaptive">Adaptive drill</option>
+              <option value="domain">Single-domain drill</option>
+              <option value="mixed">Mixed practice</option>
+              <option value="review">Due-review practice</option>
+            </select>
+          </label>
+          <label>Domain
+            <select id="domainSelect"></select>
+          </label>
+          <label>Questions
+            <input id="questionLimit" type="number" min="5" max="40" step="5" value="10">
+          </label>
+          <label>Difficulty
+            <select id="difficultySelect">
+              <option value="all">All levels</option>
+              <option value="foundational">Foundational</option>
+              <option value="standard">Standard</option>
+              <option value="advanced">Advanced</option>
+            </select>
+          </label>
+          <label>Feedback
+            <select id="feedbackMode">
+              <option value="immediate">Immediate explanations</option>
+              <option value="end">After session only</option>
+            </select>
+          </label>
+          <button class="primary" id="startPractice">Start drill</button>
+        </section>
+        <section class="session-grid advanced-practice" id="sessionGrid"></section>
+      </section>
+
+      <section class="view" id="firmDataView">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">FIRM DATA</p>
+            <h2>Search firms and compare rankings.</h2>
+          </div>
+        </div>
+        <section class="setup-panel firm-controls">
+          <label>Rank by
+            <select id="firmCriterion">
+              <option value="traineeSeats">Training contract seats</option>
+              <option value="prestige">Student interest</option>
+              <option value="pay">Pay</option>
+              <option value="training">Training</option>
+              <option value="work">Work quality</option>
+              <option value="balance">Work/life balance</option>
+              <option value="international">International exposure</option>
+              <option value="offices">Office footprint</option>
+            </select>
+          </label>
+          <label>Search
+            <input id="firmSearch" type="search" placeholder="Search firm, seat, location">
+          </label>
+        </section>
+        <section class="firm-data-layout">
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">LEADERBOARD</p>
+                <h3 id="firmLeaderboardTitle">Training contract seats</h3>
+              </div>
+              <span id="firmResultCount">0 firms</span>
+            </div>
+            <div class="firm-ranking-list" id="firmRankingList"></div>
+          </article>
+          <aside class="panel firm-detail-panel" id="firmDetailPanel"></aside>
+        </section>
+      </section>
+
+      <section class="view" id="assessmentView">
+        <section class="assessment-intro" id="assessmentIntro">
+          <div>
+            <p class="eyebrow">DIAGNOSTICS</p>
+            <h2>Choose a diagnostic.</h2>
+          </div>
+          <div class="mock-actions">
+            <button class="primary" data-start-mock="mini">Start mini mock</button>
+            <button class="secondary" data-start-mock="full">Start full mock</button>
+          </div>
+        </section>
+
+        <section class="assessment-stage hidden" id="assessmentStage">
+          <div class="assessment-top">
+            <div>
+              <p class="eyebrow" id="assessmentModeLabel">PRACTICE</p>
+              <h2 id="assessmentTitle">Session</h2>
+            </div>
+            <div class="timer-box"><small>Time remaining</small><strong id="timerText">00:00</strong></div>
+          </div>
+
+          <section class="question-layout">
+            <article class="question-card">
+              <div class="question-top">
+                <span id="questionFamily">Question family</span>
+                <small id="questionNumber">Question 1 of 1</small>
+              </div>
+              <p class="passage" id="questionPrompt"></p>
+              <select id="confidenceSelect" class="hidden" aria-hidden="true">
+                <option value="2" selected>Medium</option>
+              </select>
+              <label class="checkbox flag-row"><input id="flagQuestion" type="checkbox"> Flag for review</label>
+              <div class="options" id="answerOptions"></div>
+              <div class="feedback" id="feedback"></div>
+              <div class="arena-actions manual-actions">
+                <button class="secondary" id="previousQuestion">Previous</button>
+                <button class="secondary" id="clearAnswer">Clear</button>
+                <button class="primary" id="checkAnswer">Check answer</button>
+                <button class="primary" id="nextQuestion">Next</button>
+              </div>
+            </article>
+
+            <aside class="panel navigator-panel">
+              <p class="eyebrow">QUESTION NAVIGATOR</p>
+              <div class="drill-progress-bar"><i id="progressFill"></i></div>
+              <div class="navigator-grid" id="navigatorGrid"></div>
+              <button class="primary full hidden" id="submitAttempt">Submit attempt</button>
+              <p class="bank-note">Tap an answer to continue. Wrong answers go into Review.</p>
+            </aside>
+          </section>
+        </section>
+      </section>
+
+      <section class="view" id="resultsView">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">RESULTS</p>
+            <h2 id="resultsTitle">No submitted attempt yet.</h2>
+            <p id="resultsCopy">Complete a practice session or mock test to see verified scoring, explanations and next actions.</p>
+          </div>
+          <button class="primary" data-view-jump="review">Review mistakes</button>
+        </div>
+        <section class="status-grid" id="resultsStats"></section>
+        <section class="activity-layout">
+          <article class="panel">
+            <p class="eyebrow">DOMAIN BREAKDOWN</p>
+            <div class="analytics-bars" id="resultsBreakdown"></div>
+          </article>
+          <article class="panel">
+            <p class="eyebrow">PERFORMANCE ANALYSIS</p>
+            <div id="resultsAnalysis"></div>
+          </article>
+        </section>
+        <article class="panel">
+          <p class="eyebrow">QUESTION REVIEW</p>
+          <div class="review-list" id="questionReview"></div>
+        </article>
+      </section>
+
+      <section class="view" id="reviewView">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">SPACED REVIEW</p>
+            <h2>Wrong answers appear here.</h2>
+            <p>Every incorrect answer is saved automatically so you can practise it again.</p>
+          </div>
+          <button class="primary" id="startDueReview">Review due items</button>
+        </div>
+        <section class="setup-panel compact">
+          <label>Filter
+            <select id="reviewFilter">
+              <option value="all">All wrong answers</option>
+              <option value="due">Due now</option>
+              <option value="bookmarked">Bookmarked</option>
+              <option value="cleared">Cleared</option>
+            </select>
+          </label>
+          <label>Search
+            <input id="reviewSearch" type="search" placeholder="Domain, tag or question ID">
+          </label>
+          <button class="secondary" id="clearClearedReviews">Clear completed</button>
+        </section>
+        <section class="review-list" id="reviewQueue"></section>
+      </section>
+
+      <section class="view" id="progressView">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">PROGRESS</p>
+            <h2>Percentage correct by domain.</h2>
+            <p>Use this to see which question types you are strongest and weakest at.</p>
+          </div>
+        </div>
+        <section class="analytics-hero" id="progressHero"></section>
+        <section class="activity-layout">
+          <article class="panel">
+            <p class="eyebrow">DOMAIN ACCURACY</p>
+            <div class="analytics-bars" id="progressBars"></div>
+          </article>
+          <article class="panel">
+            <p class="eyebrow">WEAKEST AREA</p>
+            <div id="calibrationPanel"></div>
+          </article>
+        </section>
+        <article class="panel">
+          <p class="eyebrow">RECENT TEST HISTORY</p>
+          <div class="history-list" id="attemptHistory"></div>
+        </article>
+      </section>
+
+      <section class="view" id="planView">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">STUDY PLAN</p>
+            <h2>A practical plan from your target date and weakest domains.</h2>
+            <p>The recommendation engine uses structured rules from your results, not invented numbers.</p>
+          </div>
+          <button class="primary" id="generatePlan">Generate plan</button>
+        </div>
+        <section class="setup-panel">
+          <label>Target assessment date
+            <input id="targetDate" type="date">
+          </label>
+          <label>Weekly study minutes
+            <input id="weeklyMinutes" type="number" min="30" max="900" step="30" value="180">
+          </label>
+          <label>Goal
+            <select id="goalSelect">
+              <option value="baseline">Build a reliable baseline</option>
+              <option value="urgent">Urgent assessment coming up</option>
+              <option value="mastery">Push for high consistency</option>
+            </select>
+          </label>
+        </section>
+        <section class="plan-output" id="studyPlanOutput"></section>
+      </section>
+
+      <section class="view" id="adminView">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">PROTECTED ADMIN</p>
+            <h2>Question quality, user support and audit controls.</h2>
+            <p>The static preview hides admin actions from students. In production these permissions must also be enforced in Supabase RLS and API routes.</p>
+          </div>
+        </div>
+        <section class="admin-lock" id="adminLock"></section>
+        <section class="admin-console hidden" id="adminConsole">
+          <section class="analytics-hero" id="adminStats"></section>
+          <section class="activity-layout">
+            <article class="panel">
+              <p class="eyebrow">QUESTION MANAGEMENT</p>
+              <div class="admin-list" id="adminQuestions"></div>
+            </article>
+            <article class="panel">
+              <p class="eyebrow">REVIEW WORKFLOW</p>
+              <div class="admin-list" id="reviewWorkflow"></div>
+            </article>
+          </section>
+          <article class="panel">
+            <p class="eyebrow">PRODUCTION SCHEMA AND ENVIRONMENT</p>
+            <pre class="schema-box" id="schemaBox"></pre>
+          </article>
+          <article class="panel">
+            <p class="eyebrow">AUDIT LOG</p>
+            <div class="history-list" id="auditLog"></div>
+          </article>
+        </section>
+      </section>
+
+      <section class="view" id="pricingView">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">PRICING</p>
+            <h2>Choose access without hiding core preparation behind mystery buttons.</h2>
+            <p>Checkout buttons call the Stripe session API. If Stripe environment variables are missing, the app reports that clearly rather than pretending checkout completed.</p>
+          </div>
+        </div>
+        <section class="price-grid">
+          <article class="price-card">
+            <p class="eyebrow">FREE</p>
+            <h3>Preview</h3>
+            <div class="price"><strong>£0</strong></div>
+            <p>Try the platform structure and complete limited practice.</p>
+            <ul>
+              <li>Limited mixed questions</li>
+              <li>Basic results review</li>
+              <li>Limited mistake queue</li>
+            </ul>
+            <button class="secondary full" data-plan-local="free">Use free preview</button>
+          </article>
+          <article class="price-card featured">
+            <span class="popular">MOST USEFUL</span>
+            <p class="eyebrow">PRO</p>
+            <h3>Full preparation</h3>
+            <div class="price"><strong>£19</strong><span>/ month</span></div>
+            <p>For students preparing for live assessment windows.</p>
+            <ul>
+              <li>Full original question bank</li>
+              <li>All domain drills and mock tests</li>
+              <li>Advanced analytics and complete review queue</li>
+            </ul>
+            <button class="primary full" data-checkout-plan="pro">Continue to checkout</button>
+          </article>
+          <article class="price-card">
+            <p class="eyebrow">INSTITUTION</p>
+            <h3>University or society</h3>
+            <div class="price"><strong>Custom</strong></div>
+            <p>For cohorts, law societies and employability teams.</p>
+            <ul>
+              <li>Cohort access management</li>
+              <li>Aggregate privacy-conscious analytics</li>
+              <li>Admin support workflows</li>
+            </ul>
+            <button class="secondary full" data-checkout-plan="institution">Request checkout</button>
+          </article>
+        </section>
+      </section>
+
+      <section class="view" id="accountView">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">PROFILE AND ACCESS</p>
+            <h2>Set your target, subscription and study preferences.</h2>
+            <p>Optional fields personalise your dashboard. Practice remains available if you skip them.</p>
+          </div>
+        </div>
+        <section class="account-layout">
+          <form class="panel account-form" id="profileForm">
+            <label>Full name <input id="profileName" autocomplete="name" placeholder="Your name"></label>
+            <label>Email <input id="profileEmail" type="email" autocomplete="email" placeholder="you@example.com"></label>
+            <label>Target sector
+              <select id="profileSector">
+                <option>Law</option>
+                <option>Finance</option>
+                <option>Consulting</option>
+                <option>Policy</option>
+                <option>Professional services</option>
+              </select>
+            </label>
+            <label>Daily target
+              <input id="dailyTarget" type="number" min="1" max="80" value="10">
+            </label>
+            <label>Subscription
+              <select id="profilePlan">
+                <option value="free">Free</option>
+                <option value="daily">Daily Practice</option>
+                <option value="pro">Pro</option>
+                <option value="institution">Institution</option>
+              </select>
+            </label>
+            <label class="checkbox"><input id="emailConsent" type="checkbox"> Send product emails and reminders</label>
+            <button class="primary" type="submit">Save profile</button>
+          </form>
+          <article class="panel">
+            <p class="eyebrow">ENTITLEMENTS</p>
+            <div class="entitlement-list" id="entitlementList"></div>
+          </article>
+        </section>
+        <section class="disclaimer">
+          <strong>Independence notice</strong>
+          <p>Verdict provides original Watson-Glaser-style practice for critical-thinking preparation. It is not affiliated with, endorsed by or licensed by Pearson, TalentLens or any official Watson-Glaser assessment provider. Verdict does not reproduce official test questions and does not provide official Watson-Glaser scores or percentile equivalence.</p>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script src="access-control.js?v=critical-platform-1"></script>
+  <script src="legal-cheek-profile-facts.js?v=critical-platform-1"></script>
+  <script src="law-firms.js?v=critical-platform-1"></script>
+  <script src="question-bank.js?v=critical-platform-1"></script>
+  <script src="app.js?v=critical-platform-1"></script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Verdict focused Watson Glaser drill session.">
+  <title>Verdict — Drill Session</title>
+  <link rel="stylesheet" href="styles.css?v=plans-1">
+</head>
+<body class="drill-body">
+  <main class="drill-shell">
+    <header class="drill-topbar">
+      <a class="brand" href="index.html" aria-label="Back to Verdict dashboard">
+        <span class="brand-mark">V</span>
+        <span><strong>Verdict</strong><small>Focused drill</small></span>
+      </a>
+      <div class="drill-session-meta">
+        <span id="drillFamily">Watson Glaser</span>
+        <strong id="drillTitle">Practice session</strong>
+      </div>
+      <a class="secondary drill-exit" href="index.html">Exit session</a>
+    </header>
+
+    <section class="drill-status">
+      <article><small>Question bank</small><strong id="bankSize">0</strong><span>Original Verdict questions</span></article>
+      <article><small>Current score</small><strong id="scoreText">0 / 0</strong><span id="accuracyText">0% accuracy</span></article>
+      <article><small>Answered</small><strong id="answeredText">0</strong><span id="remainingText">0 remaining</span></article>
+      <article><small>Session time</small><strong id="timerText">00:00</strong><span>Keep it steady</span></article>
+    </section>
+
+    <section class="drill-stage">
+      <article class="question-card drill-question-card">
+        <div class="question-top">
+          <span id="questionFamily">Question family</span>
+          <small id="questionNumber">Question 1 of 1</small>
+        </div>
+        <h3 id="questionPrompt"></h3>
+        <div class="options" id="answerOptions"></div>
+        <div class="feedback" id="feedback"></div>
+        <div class="arena-actions">
+          <button class="secondary" id="previousQuestion">Previous</button>
+          <button class="secondary" id="skipQuestion">Skip</button>
+          <button class="primary" id="checkAnswer" disabled>Check answer</button>
+          <button class="primary" id="nextQuestion">Next question</button>
+        </div>
+      </article>
+
+      <aside class="panel drill-side-panel">
+        <p class="eyebrow">QUESTION NAVIGATOR</p>
+        <div class="drill-progress-bar"><i id="progressFill"></i></div>
+        <div class="navigator-grid" id="navigatorGrid"></div>
+        <p class="bank-note">Verdict questions are original Watson Glaser-style practice items. They are not official Pearson questions and are not copied from licensed test materials.</p>
+      </aside>
+    </section>
+  </main>
+
+  <script src="access-control.js?v=plans-1"></script>
+  <script src="question-bank.js?v=plans-1"></script>
+  <script src="drill.js?v=plans-1"></script>
+</body>
+</html>

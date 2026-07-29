@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Verdict law rankings explorer for firms, seats, courts, and chambers.">
+  <title>Verdict — Law Rankings</title>
+  <link rel="stylesheet" href="styles.css?v=public-1">
+</head>
+<body class="rankings-body">
+  <main class="rankings-shell">
+    <header class="rankings-topbar">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">V</span>
+        <span><strong>Verdict</strong><small>Law rankings</small></span>
+      </a>
+      <div class="rankings-actions">
+        <a class="secondary" href="index.html">Back to Verdict</a>
+        <a class="primary" href="index.html?view=practice">Start Watson Glaser</a>
+      </div>
+    </header>
+
+    <section class="rankings-hero">
+      <div>
+        <p class="eyebrow">FIRM RESEARCH · RANKINGS · PROFILES</p>
+        <h1>Compare firms before you decide where to apply.</h1>
+        <p>Use Verdict’s free firm explorer to compare trainee seats, salaries, retention, offices, practice strengths, and application fit. Subscriptions are only for private Watson Glaser-style practice and analytics.</p>
+      </div>
+      <article>
+        <small>Access</small>
+        <strong>Free</strong>
+        <span>Public data layer for future lawyers</span>
+      </article>
+    </section>
+
+    <section class="public-data-banner">
+      <div>
+        <span>Free research layer</span>
+        <strong>Firm data stays outside the subscription.</strong>
+      </div>
+      <p>Verdict makes firm profiles, salaries, seats, offices, student-facing scorecards and rankings free, so applicants can make better choices before they subscribe for test practice.</p>
+      <a href="index.html?view=plans">See the practice plans</a>
+    </section>
+
+    <section class="ranking-controls">
+      <label>Ranking view
+        <select id="rankingView">
+          <option value="firms">Law firms</option>
+          <option value="seats">Seat rankings</option>
+          <option value="courts">Courts & chambers</option>
+        </select>
+      </label>
+      <label>Criteria
+        <select id="rankingCriteria"></select>
+      </label>
+      <label>Search
+        <input id="rankingSearch" placeholder="Search firm, seat, court, chamber">
+      </label>
+    </section>
+
+    <section class="rankings-layout">
+      <article class="ranking-panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow" id="rankingEyebrow">FIRM RANKINGS</p>
+            <h2 id="rankingTitle">Training contract scale</h2>
+          </div>
+          <span id="rankingCount">0 results</span>
+        </div>
+        <div class="ranking-list" id="rankingList"></div>
+      </article>
+
+      <aside class="ranking-insight">
+        <p class="eyebrow">HOW TO USE THIS</p>
+        <h3 id="insightTitle">Look beyond prestige.</h3>
+        <p id="insightCopy">A firm with huge intake numbers may suit students who want large trainee cohorts. A smaller specialist seat may suit students who want earlier responsibility.</p>
+        <div class="ranking-key">
+          <span><i></i> Best for training scale</span>
+          <span><i></i> Best for seat fit</span>
+          <span><i></i> Best for advocacy/court exposure</span>
+        </div>
+      </aside>
+    </section>
+
+    <section class="seat-map">
+      <div class="section-heading">
+        <div><p class="eyebrow">SEAT SNAPSHOT</p><h2>Popular trainee seats by skill profile</h2></div>
+      </div>
+      <div class="seat-grid">
+        <article><span>Corporate / M&A</span><strong>Commercial judgement</strong><p>Best for students who like deal process, negotiation, due diligence, and client coordination.</p></article>
+        <article><span>Disputes / Litigation</span><strong>Evidence and argument</strong><p>Best for students who like case theory, documents, procedural strategy, and court-facing work.</p></article>
+        <article><span>Banking & Finance</span><strong>Structure and precision</strong><p>Best for students who enjoy documents, risk allocation, financial language, and tight deadlines.</p></article>
+        <article><span>Competition / Antitrust</span><strong>Regulatory analysis</strong><p>Best for students interested in markets, regulators, merger control, and economics.</p></article>
+      </div>
+    </section>
+
+    <p class="ranking-source-note">Verdict uses public student research data where available, including training contract counts and selected firm facts. Some salary, ranking, and university-targeting fields are labelled as estimated or inferred where firms do not publish consistent data. Always check official graduate recruitment pages before applying.</p>
+  </main>
+
+  <script src="legal-cheek-profile-facts.js?v=public-1"></script>
+  <script src="law-firms.js?v=public-1"></script>
+  <script src="law-rankings.js?v=public-1"></script>
+</body>
+</html>
