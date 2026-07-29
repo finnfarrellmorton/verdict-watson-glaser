@@ -2,21 +2,52 @@
   "name": "verdict-watson-glaser",
   "version": "0.1.0",
   "private": true,
-  "description": "Verdict Watson Glaser practice platform with Stripe and Supabase launch wiring.",
+  "description": "Verdict critical-thinking assessment preparation platform.",
   "scripts": {
-    "dev": "vercel dev",
-    "start": "vercel dev",
+    "dev": "next dev",
+    "start": "next start",
     "check": "node scripts/validate-data.js",
-    "lint": "node --check app.js && node --check drill.js && node --check firm.js && node --check law-rankings.js && node --check access-control.js && node --check scripts/validate-data.js",
-    "typecheck": "node --check api/create-checkout-session.js && node --check api/me.js && node --check api/record-attempt.js && node --check api/session-questions.js && node --check api/stripe-webhook.js",
-    "test": "node scripts/validate-data.js",
-    "build": "node --check app.js && node scripts/validate-data.js"
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "next build --webpack"
   },
   "dependencies": {
+    "@hookform/resolvers": "^3.9.1",
+    "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.50.0",
-    "stripe": "^18.2.1"
+    "@tanstack/react-query": "^5.59.16",
+    "@tanstack/react-table": "^8.20.5",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.468.0",
+    "next": "latest",
+    "posthog-js": "^1.185.0",
+    "radix-ui": "^1.0.1",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-hook-form": "^7.53.2",
+    "recharts": "^2.15.0",
+    "server-only": "^0.0.1",
+    "stripe": "^18.2.1",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
-    "vercel": "^34.0.0"
+    "@playwright/test": "^1.49.1",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.2",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.17.0",
+    "eslint-config-next": "latest",
+    "jsdom": "^25.0.1",
+    "postcss": "^8.4.49",
+    "tailwind-merge": "^2.5.5",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.2",
+    "vercel": "^34.0.0",
+    "vitest": "^2.1.8"
   }
 }

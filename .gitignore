@@ -4,8 +4,10 @@
 node_modules/
 .pnpm-store/
 .vercel/
+.next/
 dist/
 build/
 coverage/
 *.log
+*.tsbuildinfo
 agency-agents/
