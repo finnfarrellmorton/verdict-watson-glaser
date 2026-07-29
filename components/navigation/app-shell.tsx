@@ -7,7 +7,7 @@ const items = [
   ["Practice", "/app/practice", ClipboardList],
   ["Review", "/app/review", BookOpenCheck],
   ["Analytics", "/app/analytics", BarChart3],
-  ["Firms", "/app/firms/clifford-chance", Search],
+  ["Firms", "/firms", Search],
   ["Settings", "/app/settings/profile", Settings]
 ];
 
@@ -26,6 +26,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             ))}
           </nav>
         </div>
+        <nav className="border-t border-border md:hidden" aria-label="Mobile application navigation">
+          <div className="flex gap-1 overflow-x-auto px-3 py-2">
+            {items.map(([label, href, Icon]) => (
+              <Link
+                key={String(label)}
+                href={String(href)}
+                className="inline-flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-secondary hover:bg-surface2 hover:text-ink"
+              >
+                <Icon className="h-4 w-4" aria-hidden />
+                {label as string}
+              </Link>
+            ))}
+          </div>
+        </nav>
       </header>
       {children}
     </div>

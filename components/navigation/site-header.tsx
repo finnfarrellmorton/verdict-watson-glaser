@@ -31,6 +31,19 @@ export function SiteHeader() {
           </Button>
         </div>
       </div>
+      <nav className="border-t border-border md:hidden" aria-label="Mobile main navigation">
+        <div className="flex gap-1 overflow-x-auto px-3 py-2">
+          {links.map(([label, href]) => (
+            <Link
+              key={label}
+              href={href}
+              className="shrink-0 rounded-md px-3 py-2 text-sm font-medium text-secondary hover:bg-surface2 hover:text-ink"
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
+      </nav>
     </header>
   );
 }
