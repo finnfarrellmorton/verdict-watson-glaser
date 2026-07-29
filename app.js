@@ -239,7 +239,7 @@ function renderAssessment() {
   const question = questions[index];
   const saved = session.responses[question.id] || {};
   const answeredCount = Object.values(session.responses).filter(response => Number.isInteger(response.selected)).length;
-  const reveal = session.feedbackMode === 'immediate' && Number.isInteger(saved.selected);
+  const reveal = false;
   const correct = Number.isInteger(saved.selected) && saved.selected === question.answer;
 
   $('#assessmentModeLabel').textContent = session.mock === 'none' ? 'PRACTICE DRILL' : `${session.mock.toUpperCase()} MOCK`;
@@ -247,9 +247,10 @@ function renderAssessment() {
   $('#questionFamily').textContent = question.family;
   $('#questionNumber').textContent = `Question ${index + 1} of ${questions.length}`;
   $('#questionPrompt').textContent = safeQuestion(question).prompt;
+  $('#autosaveIndicator').textContent = Number.isInteger(saved.selected) ? 'Answer saved locally' : 'Ready to save';
   $('#confidenceSelect').value = saved.confidence || 2;
   $('#flagQuestion').checked = Boolean(saved.flagged);
-  $('#checkAnswer').textContent = session.feedbackMode === 'immediate' ? 'Check answer' : 'Save answer';
+  $('#checkAnswer').textContent = 'Save answer';
   $('#feedback').innerHTML = reveal ? `<strong>${correct ? 'Correct.' : 'Not quite.'}</strong> ${question.explanation}` : '';
   $('#progressFill').style.width = `${Math.round((answeredCount / questions.length) * 100)}%`;
 
@@ -299,7 +300,7 @@ function saveResponse(question, selected, explicitCheck) {
   }
   saveState();
   renderAssessment();
-  if (explicitCheck) showToast(session.feedbackMode === 'immediate' ? 'Answer checked.' : 'Answer saved.');
+  if (explicitCheck) showToast('Answer saved.');
 }
 
 function clearReviewItem(questionId) {
@@ -452,6 +453,8 @@ function updateReviewQueue(attempt) {
       reason: response.flagged ? 'Flagged for review' : 'Incorrect answer',
       reviewState: 'due',
       reviewCount: history,
+      flagged: response.flagged,
+      timeSeconds: response.timeSeconds,
       lastReviewedAt: previous?.lastReviewedAt || null,
       dueAt: now()
     });
@@ -478,23 +481,42 @@ function setView(view) {
 
 function renderDashboard() {
   const metrics = computeMetrics();
+  const hasActiveSession = Boolean(state.currentSession);
+  const weekly = weeklyTargetProgress();
   $('#sidebarName').textContent = state.profile.name || 'Guest student';
   $('#sidebarPlan').textContent = planName(state.profile.plan);
+  $('#dashboardWelcome').textContent = state.profile.name
+    ? `${state.profile.name}, your next best practice action.`
+    : 'Your next best practice action.';
   $('#statCompleted').textContent = metrics.responses.length.toLocaleString();
   $('#statAccuracy').textContent = `${metrics.accuracy}%`;
   $('#statDue').textContent = metrics.due;
   $('#statStreak').textContent = `${calculateStreak()} days`;
   $('#targetCopy').textContent = `${todayQuestionCount()} / ${state.profile.dailyTarget} daily target`;
+  $('#weeklyTargetValue').textContent = `${weekly.completed}/${weekly.target}`;
+  $('#weeklyTargetCopy').textContent = `${weekly.percent}% of this week’s target complete.`;
+  $('#weeklyTargetFill').style.width = `${weekly.percent}%`;
   const weak = metrics.byDomain.sort((a, b) => a.mastery - b.mastery)[0];
   $('#nextActionTitle').textContent = metrics.due ? 'Review due mistakes before starting new questions.' : `Train ${weak.name.toLowerCase()} next.`;
   $('#nextActionCopy').textContent = metrics.due
     ? `${metrics.due} item${metrics.due === 1 ? '' : 's'} are ready for spaced review.`
     : weak.attempted ? `${weak.name} is your lowest domain.` : 'Start with any domain or a diagnostic.';
-  $('#nextActionButton').onclick = () => metrics.due ? startSession({ mode: 'review', limit: Math.min(10, metrics.due) }) : startSession({ mode: weak.attempted ? 'domain' : 'mixed', domainId: weak.attempted ? weak.id : 'all', limit: 10 });
+  $('#dashboardNextCopy').textContent = $('#nextActionCopy').textContent;
+  const recommendedAction = () => metrics.due ? startSession({ mode: 'review', limit: Math.min(10, metrics.due) }) : startSession({ mode: weak.attempted ? 'domain' : 'mixed', domainId: weak.attempted ? weak.id : 'all', limit: 10 });
+  $('#nextActionButton').onclick = recommendedAction;
+  $('#dashboardPrimaryAction').onclick = recommendedAction;
+  $('#continueSessionButton').hidden = !hasActiveSession;
+  $('#continueSessionButton').onclick = () => setView('assessment');
 
   $('#dashboardDomains').innerHTML = metrics.byDomain.map(domain => domainCard(domain)).join('');
-  $$('.domain-card').forEach(card => card.onclick = () => {
-    startSession({ mode: 'domain', domainId: card.dataset.domain, limit: 10, feedbackMode: 'end' });
+  $$('.domain-card').forEach(card => {
+    card.onclick = () => startSession({ mode: 'domain', domainId: card.dataset.domain, limit: 10, feedbackMode: 'end' });
+    card.onkeydown = event => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        card.click();
+      }
+    };
   });
 
   $('#recentActivity').innerHTML = state.attempts.length ? state.attempts.slice(0, 6).map(attempt => `
@@ -539,7 +561,7 @@ function domainCard(domain) {
       <div><span>${domain.name}</span><strong>${domain.attempted ? `${domain.accuracy}%` : '-'}</strong></div>
       <p>${domain.short}</p>
       <div class="bar"><i style="width:${domain.attempted ? domain.accuracy : 0}%"></i></div>
-      <small>Tap to start · ${domain.attempted} done</small>
+      <small>${domain.attempted} attempted · ${domain.mastery}% mastery · ${domain.label}</small>
     </article>
   `;
 }
@@ -553,6 +575,17 @@ function todayQuestionCount() {
   const start = new Date();
   start.setHours(0, 0, 0, 0);
   return getResponses().filter(response => response.submittedAt >= start.getTime()).length;
+}
+
+function weeklyTargetProgress() {
+  const day = new Date();
+  const dayOfWeek = day.getDay() || 7;
+  const monday = new Date(day);
+  monday.setDate(day.getDate() - dayOfWeek + 1);
+  monday.setHours(0, 0, 0, 0);
+  const completed = getResponses().filter(response => response.submittedAt >= monday.getTime()).length;
+  const target = Math.max(1, Number(state.profile.dailyTarget || 10) * 7);
+  return { completed, target, percent: Math.min(100, Math.round((completed / target) * 100)) };
 }
 
 function calculateStreak() {
@@ -601,8 +634,14 @@ function renderLessonDetail(domainId) {
 function renderPractice() {
   $('#domainSelect').innerHTML = '<option value="all">All domains</option>' + domains.map(domain => `<option value="${domain.id}">${domain.name}</option>`).join('');
   $('#practiceDomains').innerHTML = computeMetrics().byDomain.map(domain => domainCard(domain)).join('');
-  $$('#practiceDomains .domain-card').forEach(card => card.onclick = () => {
-    startSession({ mode: 'domain', domainId: card.dataset.domain, limit: 10, feedbackMode: 'end' });
+  $$('#practiceDomains .domain-card').forEach(card => {
+    card.onclick = () => startSession({ mode: 'domain', domainId: card.dataset.domain, limit: 10, feedbackMode: 'end' });
+    card.onkeydown = event => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        card.click();
+      }
+    };
   });
   const sessions = [
     ['adaptive', 'Adaptive drill', 'Prioritises weak domains, due items and unseen questions.'],
@@ -706,11 +745,20 @@ function renderResults() {
 
   $('#resultsTitle').textContent = `${attempt.accuracy}% on ${attempt.type}`;
   $('#resultsCopy').textContent = `${attempt.correctAnswers} correct from ${attempt.totalQuestions}. ${attempt.answeredQuestions} answered. Duration: ${formatTime(attempt.durationSeconds)}.`;
+  const unanswered = attempt.totalQuestions - attempt.answeredQuestions;
+  const previousComparable = state.attempts.find(candidate => candidate.id !== attempt.id && candidate.type === attempt.type);
+  const averageResponseTime = attempt.responses.length
+    ? Math.round(attempt.responses.reduce((sum, response) => sum + response.timeSeconds, 0) / attempt.responses.length)
+    : 0;
   $('#resultsStats').innerHTML = [
     ['Score', `${attempt.correctAnswers}/${attempt.totalQuestions}`, 'Deterministic scoring'],
     ['Accuracy', `${attempt.accuracy}%`, 'Submitted answers only'],
-    ['Flagged', attempt.responses.filter(response => response.flagged).length, 'Added to review queue'],
-    ['Wrong answers', attempt.responses.filter(response => !response.correct).length, 'Saved for review']
+    ['Incorrect', attempt.responses.filter(response => !response.correct).length, 'Saved for review'],
+    ['Unanswered', unanswered, 'No answer selected'],
+    ['Time used', formatTime(attempt.durationSeconds), 'Session duration'],
+    ['Avg response', `${averageResponseTime}s`, 'Per question'],
+    ['Previous', previousComparable ? `${previousComparable.accuracy}%` : '-', previousComparable ? `${attempt.accuracy - previousComparable.accuracy >= 0 ? '+' : ''}${attempt.accuracy - previousComparable.accuracy} pts` : 'No comparable attempt'],
+    ['Flagged', attempt.responses.filter(response => response.flagged).length, 'Added to review queue']
   ].map(item => `<article><small>${item[0]}</small><strong>${item[1]}</strong><span>${item[2]}</span></article>`).join('');
 
   const breakdown = domains.map(domain => {
@@ -730,15 +778,20 @@ function renderResults() {
 
   $('#questionReview').innerHTML = attempt.responses.map((response, index) => `
     <article class="review-card">
-      <div><strong>Question ${index + 1} · ${response.family}</strong><span class="${response.correct ? 'good' : 'bad'}">${response.correct ? 'Correct' : 'Incorrect'}</span></div>
+      <div><strong>Question ${index + 1} · ${response.family}</strong><span class="status-badge ${response.correct ? 'success' : 'destructive'}">${response.correct ? 'Correct' : 'Incorrect'}</span></div>
       <p>${response.promptSnapshot}</p>
       <p><strong>Your answer:</strong> ${response.selected === null ? 'No answer' : response.optionsSnapshot[response.selected]}</p>
       <p><strong>Correct answer:</strong> ${response.optionsSnapshot[response.correctAnswer]}</p>
       <p>${response.explanationSnapshot}</p>
+      <p><strong>Reasoning rule:</strong> Stay inside the stated evidence and choose only what the prompt logically supports.</p>
+      <p><strong>Common trap:</strong> Selecting a plausible answer that adds assumptions not present in the passage.</p>
+      <p><strong>Response time:</strong> ${response.timeSeconds}s · <strong>Confidence:</strong> ${response.confidence || 2}/3</p>
       <button class="secondary" data-bookmark="${response.questionId}">${state.bookmarks.includes(response.questionId) ? 'Bookmarked' : 'Bookmark'}</button>
+      <button class="secondary" data-report-question="${response.questionId}">Report question</button>
     </article>
   `).join('');
   $$('[data-bookmark]').forEach(button => button.onclick = () => toggleBookmark(button.dataset.bookmark));
+  $$('[data-report-question]').forEach(button => button.onclick = () => showToast(`Report captured locally for ${button.dataset.reportQuestion}.`));
 }
 
 function calibrationSentence(responses) {
@@ -759,12 +812,27 @@ function toggleBookmark(questionId) {
 function renderReview() {
   const bank = new Map(allQuestions().map(question => [question.id, question]));
   const filter = $('#reviewFilter')?.value || 'all';
+  const domainFilter = $('#reviewDomainFilter')?.value || 'all';
   const term = ($('#reviewSearch')?.value || '').toLowerCase();
+  if ($('#reviewDomainFilter') && !$('#reviewDomainFilter').options.length) {
+    $('#reviewDomainFilter').innerHTML = '<option value="all">All domains</option>' + domains.map(domain => `<option value="${domain.id}">${domain.name}</option>`).join('');
+  }
   let items = state.reviewItems;
   if (filter === 'due') items = items.filter(item => item.reviewState !== 'cleared' && item.dueAt <= now());
   if (filter === 'bookmarked') items = items.filter(item => state.bookmarks.includes(item.questionId));
   if (filter === 'cleared') items = items.filter(item => item.reviewState === 'cleared');
+  if (filter === 'flagged') items = items.filter(item => item.flagged || item.reason === 'Flagged for review');
+  if (filter === 'slow') items = items.filter(item => Number(item.timeSeconds || 0) >= 90);
+  if (domainFilter !== 'all') items = items.filter(item => item.domainId === domainFilter);
   if (term) items = items.filter(item => `${item.questionId} ${item.family} ${item.domainId}`.toLowerCase().includes(term));
+  if ($('#reviewView')?.classList.contains('active')) {
+    const params = new URLSearchParams(location.search);
+    params.set('view', 'review');
+    params.set('filter', filter);
+    if (domainFilter !== 'all') params.set('domain', domainFilter);
+    else params.delete('domain');
+    history.replaceState(null, '', `${location.pathname}?${params.toString()}`);
+  }
 
   const openItems = items.filter(item => item.reviewState !== 'cleared' || filter === 'cleared');
   const activeItems = state.reviewItems.filter(item => item.reviewState !== 'cleared');
@@ -791,7 +859,7 @@ function renderReview() {
       <article class="review-card">
         <div><strong>${item.family}</strong><span>${item.reason}</span></div>
         <p>${question?.prompt || 'Question snapshot unavailable.'}</p>
-        <small>${item.reviewCount ? `Reviewed ${item.reviewCount} times` : 'Ready now'}</small>
+        <small>${item.reviewCount ? `Reviewed ${item.reviewCount} times` : 'Ready now'} · ${item.timeSeconds ? `${item.timeSeconds}s` : 'No timing'} · ${item.reviewState}</small>
         <div class="inline-actions">
           <button class="primary" data-review-start="${item.questionId}">Practise this</button>
           <button class="secondary" data-review-clear="${item.questionId}">Mark clear</button>
@@ -921,13 +989,18 @@ function renderAdmin() {
     ['Feedback items', state.reviewItems.length, 'Student review queue']
   ].map(item => `<article><small>${item[0]}</small><strong>${item[1]}</strong><span>${item[2]}</span></article>`).join('');
 
-  $('#adminQuestions').innerHTML = bank.slice(0, 8).map(question => `
+  const adminSearch = ($('#adminSearch')?.value || '').toLowerCase().trim();
+  const statusFilter = $('#adminStatusFilter')?.value || 'all';
+  const filteredQuestions = bank
+    .filter(question => statusFilter === 'all' || question.status === statusFilter)
+    .filter(question => !adminSearch || `${question.id} ${question.family} ${question.domainId} ${question.status}`.toLowerCase().includes(adminSearch));
+  $('#adminQuestions').innerHTML = filteredQuestions.slice(0, 12).map(question => `
     <div class="admin-row">
       <span><strong>${question.id}</strong>${question.family}</span>
-      <small>${question.status.replace('_', ' ')} · v${question.version}</small>
+      <small><span class="status-badge ${question.status === 'published' ? 'success' : 'warning'}">${question.status.replace('_', ' ')}</span> · v${question.version}</small>
       <button class="secondary" data-preview-question="${question.id}">Preview</button>
     </div>
-  `).join('');
+  `).join('') || '<p class="empty">No questions match these filters.</p>';
   $$('[data-preview-question]').forEach(button => button.onclick = () => {
     const question = bank.find(item => item.id === button.dataset.previewQuestion);
     showToast(`${question.id}: ${question.explanation.slice(0, 90)}...`);
@@ -1023,11 +1096,22 @@ function renderAll() {
 }
 
 function bindEvents() {
-  $$('[data-view]').forEach(button => button.onclick = () => setView(button.dataset.view));
+  $$('[data-view]').forEach(button => button.onclick = () => {
+    setView(button.dataset.view);
+    $('#primaryNav')?.classList.remove('open');
+    $('#mobileMenuButton')?.setAttribute('aria-expanded', 'false');
+  });
+  $('#mobileMenuButton').onclick = () => {
+    const nav = $('#primaryNav');
+    const open = nav.classList.toggle('open');
+    $('#mobileMenuButton').setAttribute('aria-expanded', String(open));
+  };
   $$('[data-view-jump], [data-view-link]').forEach(button => {
     button.onclick = event => {
       event.preventDefault();
       setView(button.dataset.viewJump || button.dataset.viewLink);
+      $('#primaryNav')?.classList.remove('open');
+      $('#mobileMenuButton')?.setAttribute('aria-expanded', 'false');
     };
   });
   $('#roleSelect').onchange = event => {
@@ -1080,6 +1164,7 @@ function bindEvents() {
   $('#submitAttempt').onclick = submitAttempt;
   $('#startDueReview').onclick = () => startSession({ mode: 'review', limit: 10 });
   $('#reviewFilter').onchange = renderReview;
+  $('#reviewDomainFilter').onchange = renderReview;
   $('#reviewSearch').oninput = renderReview;
   $('#firmCriterion').onchange = renderFirmData;
   $('#firmSearch').oninput = renderFirmData;
@@ -1089,6 +1174,13 @@ function bindEvents() {
     renderAll();
   };
   $('#generatePlan').onclick = renderStudyPlan;
+  $('#adminSearch').oninput = renderAdmin;
+  $('#adminStatusFilter').onchange = renderAdmin;
+  $('#adminResetFilters').onclick = () => {
+    $('#adminSearch').value = '';
+    $('#adminStatusFilter').value = 'all';
+    renderAdmin();
+  };
   $$('[data-checkout-plan]').forEach(button => {
     button.onclick = () => startCheckout(button.dataset.checkoutPlan);
   });
@@ -1120,7 +1212,10 @@ function bindEvents() {
 function init() {
   bindEvents();
   renderAll();
-  const requestedView = new URLSearchParams(location.search).get('view');
+  const params = new URLSearchParams(location.search);
+  const requestedView = params.get('view');
+  if ($('#reviewFilter') && params.get('filter')) $('#reviewFilter').value = params.get('filter');
+  if ($('#reviewDomainFilter') && params.get('domain')) $('#reviewDomainFilter').value = params.get('domain');
   if (requestedView && titleMap[requestedView]) setView(requestedView);
   timerHandle = setInterval(() => {
     if (state.currentSession && !$('#assessmentStage').classList.contains('hidden')) renderTimer();

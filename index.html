@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Verdict is an independent Watson-Glaser-style critical-thinking practice platform for university students.">
   <title>Verdict — Critical Thinking Test Prep</title>
-  <link rel="stylesheet" href="styles.css?v=critical-platform-1">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css?v=shadcn-static-1">
 </head>
 <body>
   <div class="app-shell">
@@ -15,7 +16,9 @@
         <span><strong>Verdict</strong><small>Assessment prep</small></span>
       </a>
 
-      <nav class="nav" aria-label="Primary navigation">
+      <button class="mobile-menu-button" id="mobileMenuButton" type="button" aria-controls="primaryNav" aria-expanded="false">Menu</button>
+
+      <nav class="nav" id="primaryNav" aria-label="Primary navigation">
         <button class="nav-item active" data-view="dashboard">Home</button>
         <button class="nav-item" data-view="practice">Practice</button>
         <button class="nav-item" data-view="firmData">Firm data</button>
@@ -52,20 +55,39 @@
       <section class="view active" id="dashboardView">
         <section class="hero">
           <div>
-            <span class="soft-label">PRICING</span>
-            <h2>Choose the level of practice you need.</h2>
-            <p>Start with free firm research, or unlock full mock tests, domain drills, analytics and wrong-answer review.</p>
+            <span class="soft-label">STUDENT DASHBOARD</span>
+            <h2 id="dashboardWelcome">Your next best practice action.</h2>
+            <p id="dashboardNextCopy">Start with a short diagnostic, then use your results to decide which reasoning domain to train next.</p>
             <div class="hero-actions">
-              <button class="primary light" data-checkout-plan="pro">Start Pro</button>
-              <button class="secondary light" data-view-jump="firmData">Use free firm data</button>
+              <button class="primary light" id="dashboardPrimaryAction">Start recommended practice</button>
+              <button class="secondary light" id="continueSessionButton">Continue session</button>
             </div>
           </div>
-          <div class="hero-panel">
-            <span>Most useful</span>
-            <strong>£19/mo</strong>
-            <small>Full mocks, domain drills, analytics and review.</small>
+          <div class="hero-panel" id="dashboardTargetPanel">
+            <span>Weekly target</span>
+            <strong id="weeklyTargetValue">0/0</strong>
+            <small id="weeklyTargetCopy">Set a daily target in Profile.</small>
+            <div class="bar" aria-hidden="true"><i id="weeklyTargetFill"></i></div>
           </div>
         </section>
+
+        <section class="status-grid slim">
+          <article><small>Questions completed</small><strong id="statCompleted">0</strong><span>Across all attempts</span></article>
+          <article><small>Average accuracy</small><strong id="statAccuracy">0%</strong><span>Based on submitted answers</span></article>
+          <article><small>Due for review</small><strong id="statDue">0</strong><span>Mistakes and flagged questions</span></article>
+          <article><small>Current streak</small><strong id="statStreak">0 days</strong><span id="targetCopy">Set a daily target in profile</span></article>
+        </section>
+
+        <section class="section-heading">
+          <div>
+            <p class="eyebrow">DOMAINS</p>
+            <h2 id="nextActionTitle">Practise one skill.</h2>
+            <p id="nextActionCopy">Tap a domain to start a short drill.</p>
+          </div>
+          <button class="primary" id="nextActionButton">Start now</button>
+        </section>
+
+        <section class="domain-grid" id="dashboardDomains"></section>
 
         <section class="landing-section">
           <section class="price-grid landing-pricing">
@@ -132,37 +154,6 @@
             </aside>
           </section>
         </section>
-
-        <section class="diagnostic-grid landing-hidden">
-          <article class="diagnostic-card" data-start-mock="full">
-            <span>Mock test</span>
-            <strong>Full Watson Glaser mock</strong>
-            <small>40 mixed questions</small>
-          </article>
-          <article class="diagnostic-card" data-start-mock="mini">
-            <span>Short mock</span>
-            <strong>Quick mixed practice</strong>
-            <small>12 mixed questions</small>
-          </article>
-        </section>
-
-        <section class="status-grid slim landing-hidden">
-          <article><small>Questions completed</small><strong id="statCompleted">0</strong><span>Across all attempts</span></article>
-          <article><small>Average accuracy</small><strong id="statAccuracy">0%</strong><span>Based on submitted answers</span></article>
-          <article><small>Due for review</small><strong id="statDue">0</strong><span>Mistakes and flagged questions</span></article>
-          <article><small>Current streak</small><strong id="statStreak">0 days</strong><span id="targetCopy">Set a daily target in profile</span></article>
-        </section>
-
-        <section class="section-heading landing-hidden">
-          <div>
-            <p class="eyebrow">DOMAINS</p>
-            <h2 id="nextActionTitle">Practise one skill.</h2>
-            <p id="nextActionCopy">Tap a domain to start a short drill.</p>
-          </div>
-          <button class="primary" id="nextActionButton">Start now</button>
-        </section>
-
-        <section class="domain-grid landing-hidden" id="dashboardDomains"></section>
 
         <section class="activity-layout dashboard-extra">
           <article class="panel">
@@ -310,10 +301,11 @@
 
           <section class="question-layout">
             <article class="question-card">
-              <div class="question-top">
-                <span id="questionFamily">Question family</span>
-                <small id="questionNumber">Question 1 of 1</small>
-              </div>
+            <div class="question-top">
+              <span id="questionFamily">Question family</span>
+              <small id="questionNumber">Question 1 of 1</small>
+            </div>
+              <div class="autosave-indicator" id="autosaveIndicator" role="status">Saved locally</div>
               <p class="passage" id="questionPrompt"></p>
               <select id="confidenceSelect" class="hidden" aria-hidden="true">
                 <option value="2" selected>Medium</option>
@@ -382,7 +374,12 @@
               <option value="due">Due now</option>
               <option value="bookmarked">Bookmarked</option>
               <option value="cleared">Cleared</option>
+              <option value="flagged">Flagged questions</option>
+              <option value="slow">Slow answers</option>
             </select>
+          </label>
+          <label>Domain
+            <select id="reviewDomainFilter"></select>
           </label>
           <label>Search
             <input id="reviewSearch" type="search" placeholder="Domain, tag or question ID">
@@ -455,6 +452,19 @@
         <section class="admin-lock" id="adminLock"></section>
         <section class="admin-console hidden" id="adminConsole">
           <section class="analytics-hero" id="adminStats"></section>
+          <section class="setup-panel compact admin-toolbar">
+            <label>Question search
+              <input id="adminSearch" type="search" placeholder="Search ID, domain or family">
+            </label>
+            <label>Status
+              <select id="adminStatusFilter">
+                <option value="all">All statuses</option>
+                <option value="published">Published</option>
+                <option value="in_review">In review</option>
+              </select>
+            </label>
+            <button class="secondary" id="adminResetFilters" type="button">Reset</button>
+          </section>
           <section class="activity-layout">
             <article class="panel">
               <p class="eyebrow">QUESTION MANAGEMENT</p>

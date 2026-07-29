@@ -6,7 +6,11 @@
   "scripts": {
     "dev": "vercel dev",
     "start": "vercel dev",
-    "check": "node scripts/validate-data.js"
+    "check": "node scripts/validate-data.js",
+    "lint": "node --check app.js && node --check drill.js && node --check firm.js && node --check law-rankings.js && node --check access-control.js && node --check scripts/validate-data.js",
+    "typecheck": "node --check api/create-checkout-session.js && node --check api/me.js && node --check api/record-attempt.js && node --check api/session-questions.js && node --check api/stripe-webhook.js",
+    "test": "node scripts/validate-data.js",
+    "build": "node --check app.js && node scripts/validate-data.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.50.0",
